@@ -23,6 +23,10 @@ class CsvToSqlite(object):
             for key in keys:
                 if key == None:
                     raise Exception('The number of column names is not equal to the number of columns.')
+                if key == 'id':
+                    raise Exception("""Please pick a different name for the "id" column.
+                                       It is used interally by this script to generate a unique
+                                       identifier for each row.""")
                 if row[key].isdigit():
                     coltype = 'INTEGER'
                 elif CsvToSqlite.is_float(row[key]):
