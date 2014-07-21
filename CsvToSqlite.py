@@ -19,8 +19,10 @@ class CsvToSqlite(object):
             row = csvReader.next()
 
             keys = row.keys()
-            fielddefs = [];
+            fielddefs = []
             for key in keys:
+                if key == None:
+                    raise Exception('The number of column names is not equal to the number of columns.')
                 if row[key].isdigit():
                     coltype = 'INTEGER'
                 elif CsvToSqlite.is_float(row[key]):
