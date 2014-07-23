@@ -8,7 +8,9 @@ class CsvToSqlite(object):
     @staticmethod
     def createSQLite(csvFile, dbFile, tableName):
         with open(csvFile, 'r') as f:
-            csvReader = csv.DictReader(open(csvFile, 'r'), delimiter=',')
+            dialect = csv.Sniffer().sniff(f.read(1024))
+            f.seek(0)
+            csvReader = csv.DictReader(f, delimiter = dialect.delimiter)
 
             # create sqlite db
             conn = sqlite3.connect(dbFile)
@@ -36,7 +38,11 @@ class CsvToSqlite(object):
                 fielddefs.append('"%s" %s' % (key, coltype))
 
             q = 'CREATE TABLE IF NOT EXISTS "%s" ("id" INTEGER PRIMARY KEY AUTOINCREMENT, %s)' % (tableName, ','.join(fielddefs))
+            if not sqlite3.complete_statement(q):
+                err = 'Query %s is not valid. This may mean you are using reserved words for the column or table names.' % q
+                raise Exception(err)
             c.execute(q)
+
             insertQuery = 'INSERT INTO %s (%s) VALUES (%s)' % (tableName, ','.join(keys), ','.join([':' + x for x in keys]));
 
             c.execute(insertQuery, row)
